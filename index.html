@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏁 ГОНКА ЗА КАЧЕСТВО</title>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void:       #03050F;
+  --deep:       #060B1A;
+  --nebula1:    #0D1B3E;
+  --nebula2:    #1A0A2E;
+  --cyan:       #00E5FF;
+  --cyan-dim:   rgba(0,229,255,0.15);
+  --cyan-glow:  rgba(0,229,255,0.5);
+  --magenta:    #FF2D7A;
+  --mag-dim:    rgba(255,45,122,0.15);
+  --gold:       #FFD037;
+  --silver:     #B8CDD9;
+  --bronze:     #FF8C42;
+  --green:      #00FF9D;
+  --green-dim:  rgba(0,255,157,0.12);
+  --panel:      rgba(6,11,26,0.88);
+  --border:     rgba(0,229,255,0.18);
+  --text:       #E8F4FF;
+  --text-dim:   rgba(232,244,255,0.5);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  width:100vw; height:100vh;
+  overflow:hidden;
+  background: var(--void);
+  font-family: 'Exo 2', sans-serif;
+  color: var(--text);
+}
+
+/* ═══════════════════════════════
+   SPACE BACKGROUND
+═══════════════════════════════ */
+#space-bg {
+  position: fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 30%, rgba(13,27,62,0.9) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 70%, rgba(26,10,46,0.8) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 50% 10%, rgba(0,50,80,0.4) 0%, transparent 60%),
+    var(--void);
+}
+
+#starfield { position:fixed; inset:0; z-index:1; pointer-events:none; }
+
+/* Nebula wisps */
+.nebula-wisp {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  filter: blur(60px);
+  animation: nebulaFloat ease-in-out infinite alternate;
+}
+@keyframes nebulaFloat {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(20px, -15px) scale(1.05); }
+}
+
+/* Scanlines overlay */
+body::after {
+  content:'';
+  position:fixed; inset:0; z-index:998; pointer-events:none;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+  );
+}
+
+/* ═══════════════════════════════
+   CONFIG OVERLAY
+═══════════════════════════════ */
+.config-overlay {
+  position:fixed; inset:0; z-index:900;
+  background: rgba(3,5,15,0.8);
+  backdrop-filter: blur(8px);
+  display:flex; align-items:center; justify-content:center;
+}
+.config-box {
+  background: linear-gradient(135deg, rgba(6,11,26,0.97), rgba(13,8,30,0.97));
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 44px 48px;
+  width: min(540px, 92vw);
+  box-shadow: 0 0 60px rgba(0,229,255,0.1), 0 0 120px rgba(0,229,255,0.04);
+}
+.config-box h2 {
+  font-size: 24px; font-weight: 900;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--cyan);
+  text-shadow: 0 0 20px var(--cyan-glow);
+  margin-bottom: 6px;
+}
+.config-box .sub {
+  font-size: 13px; color: var(--text-dim);
+  margin-bottom: 30px; letter-spacing: 0.05em;
+}
+.form-group { margin-bottom: 20px; }
+.form-group label {
+  display:block; font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.2em;
+  color: rgba(0,229,255,0.6); margin-bottom:8px;
+}
+.form-group input, .form-group select {
+  width:100%;
+  background: rgba(0,229,255,0.04);
+  border: 1px solid rgba(0,229,255,0.25);
+  border-radius:10px; padding:12px 16px;
+  color: var(--text); font-family:'Exo 2',sans-serif; font-size:14px;
+  outline:none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-group input:focus, .form-group select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 16px rgba(0,229,255,0.2);
+}
+.form-group input::placeholder { color: rgba(255,255,255,0.2); }
+.form-hint {
+  font-size:11px; color:rgba(255,255,255,0.3);
+  margin-top:6px; line-height:1.6;
+}
+.config-err {
+  color: var(--magenta); font-size:12px;
+  margin-top:4px; display:none;
+  text-shadow: 0 0 8px var(--magenta);
+}
+.btn-launch {
+  width:100%; padding:14px;
+  background: linear-gradient(90deg, rgba(0,229,255,0.15), rgba(0,229,255,0.08));
+  border: 1px solid var(--cyan); border-radius:10px;
+  color: var(--cyan); font-family:'Exo 2',sans-serif;
+  font-size:17px; font-weight:800;
+  letter-spacing:0.15em; text-transform:uppercase;
+  cursor:pointer; transition:all 0.2s; margin-top:8px;
+  box-shadow: 0 0 20px rgba(0,229,255,0.1);
+}
+.btn-launch:hover {
+  background: linear-gradient(90deg, rgba(0,229,255,0.25), rgba(0,229,255,0.15));
+  box-shadow: 0 0 30px rgba(0,229,255,0.3);
+  transform: translateY(-1px);
+}
+.btn-demo {
+  width:100%; padding:10px; background:transparent;
+  border:1px solid rgba(255,255,255,0.1); border-radius:10px;
+  color:rgba(255,255,255,0.3); font-family:'Exo 2',sans-serif;
+  font-size:13px; font-weight:600; letter-spacing:0.1em;
+  text-transform:uppercase; cursor:pointer; margin-top:8px;
+  transition:all 0.2s;
+}
+.btn-demo:hover { color:rgba(255,255,255,0.6); border-color:rgba(255,255,255,0.25); }
+
+/* ═══════════════════════════════
+   LAYOUT
+═══════════════════════════════ */
+#app {
+  position:relative; z-index:10;
+  width:100%; height:100%;
+  display:flex; flex-direction:column;
+  display:none;
+}
+
+/* ═══════════════════════════════
+   HEADER
+═══════════════════════════════ */
+.hdr {
+  flex-shrink:0;
+  padding: 14px 36px 10px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(0,229,255,0.05) 0%, transparent 100%);
+  position:relative;
+}
+/* corner accents */
+.hdr::before, .hdr::after {
+  content:''; position:absolute;
+  width:30px; height:30px;
+  border-color: var(--cyan); border-style:solid; opacity:0.4;
+}
+.hdr::before { top:8px; left:10px; border-width:2px 0 0 2px; }
+.hdr::after  { top:8px; right:10px; border-width:2px 2px 0 0; }
+
+.hdr-center { text-align:center; flex:1; }
+.hdr-title {
+  font-size: clamp(20px, 3vw, 44px);
+  font-weight: 900; letter-spacing: 0.12em;
+  text-transform: uppercase; line-height:1;
+  background: linear-gradient(90deg, var(--cyan) 0%, #fff 40%, var(--magenta) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 12px rgba(0,229,255,0.4));
+  animation: titleShimmer 4s ease-in-out infinite;
+}
+@keyframes titleShimmer {
+  0%,100% { filter: drop-shadow(0 0 12px rgba(0,229,255,0.4)); }
+  50%      { filter: drop-shadow(0 0 20px rgba(0,229,255,0.7)) drop-shadow(0 0 40px rgba(255,45,122,0.3)); }
+}
+.hdr-sub {
+  font-size: clamp(10px, 1.1vw, 14px);
+  color: var(--text-dim); letter-spacing:0.25em;
+  text-transform:uppercase; margin-top:3px;
+}
+.hdr-side {
+  width:160px; display:flex; flex-direction:column;
+  align-items:flex-end; gap:4px;
+  font-family:'Share Tech Mono', monospace;
+  font-size:11px; color:var(--text-dim);
+}
+.hdr-side-left { align-items:flex-start; }
+.live-pill {
+  display:flex; align-items:center; gap:5px;
+  background: rgba(0,255,157,0.08);
+  border:1px solid rgba(0,255,157,0.3);
+  border-radius:20px; padding:3px 10px;
+  font-size:10px; font-weight:700;
+  letter-spacing:0.15em; color:var(--green);
+}
+.live-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--green); box-shadow:0 0 6px var(--green);
+  animation:blink 1s step-end infinite;
+}
+@keyframes blink { 50%{opacity:0;} }
+
+/* ═══════════════════════════════
+   TRACK AREA
+═══════════════════════════════ */
+.track-area {
+  flex:1; overflow-y:auto; overflow-x:hidden;
+  scrollbar-width:none; padding:8px 28px 6px;
+  display:flex; flex-direction:column; gap:6px;
+}
+.track-area::-webkit-scrollbar { display:none; }
+
+/* ═══════════════════════════════
+   LANE
+═══════════════════════════════ */
+.lane {
+  position:relative; flex-shrink:0;
+  height: calc((100vh - 130px) / 15.5);
+  min-height:42px; max-height:64px;
+  display:flex; align-items:stretch;
+}
+
+/* Track tube */
+.track-tube {
+  position:absolute; left:290px; right:150px; top:0; bottom:0;
+  background: linear-gradient(180deg,
+    rgba(0,229,255,0.04) 0%, rgba(0,10,30,0.6) 50%, rgba(0,229,255,0.04) 100%
+  );
+  border-top:1px solid rgba(0,229,255,0.08);
+  border-bottom:1px solid rgba(0,229,255,0.08);
+  overflow:hidden;
+}
+
+/* Hyperspace lines scrolling */
+.track-tube::before {
+  content:'';
+  position:absolute; inset:0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px, transparent 50px,
+    rgba(0,229,255,0.06) 50px, rgba(0,229,255,0.06) 51px
+  );
+  animation: hyperScroll 0.6s linear infinite;
+}
+@keyframes hyperScroll {
+  from { background-position:0 0; }
+  to   { background-position:-51px 0; }
+}
+/* Centre streak */
+.track-tube::after {
+  content:'';
+  position:absolute; top:50%; left:0; right:0; height:1px;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(0,229,255,0.12) 20%,
+    rgba(0,229,255,0.25) 50%, rgba(0,229,255,0.12) 80%, transparent 100%
+  );
+  transform:translateY(-50%);
+}
+
+/* Finish gate */
+.finish-gate {
+  position:absolute; right:150px; top:0; bottom:0; width:22px; z-index:8;
+  background: repeating-conic-gradient(rgba(255,255,255,0.9) 0% 25%, rgba(20,20,20,0.9) 0% 50%) 0 0/11px 11px;
+  box-shadow: -4px 0 16px rgba(255,255,255,0.15), 4px 0 16px rgba(255,255,255,0.1);
+}
+
+/* ── LEFT PANEL (rank + name) */
+.lane-left {
+  position:absolute; left:0; top:0; bottom:0; width:290px;
+  z-index:12;
+  background: var(--panel);
+  border-right:1px solid var(--border);
+  display:flex; align-items:center; gap:10px; padding:0 12px 0 10px;
+  clip-path: polygon(0 0, 100% 0, 96% 100%, 0 100%);
+}
+/* top 3 get a glowing left edge */
+.lane.rank-1 .lane-left { border-left:3px solid var(--gold);    box-shadow: inset 3px 0 20px rgba(255,208,55,0.15); }
+.lane.rank-2 .lane-left { border-left:3px solid var(--silver);  box-shadow: inset 3px 0 20px rgba(184,205,217,0.1); }
+.lane.rank-3 .lane-left { border-left:3px solid var(--bronze);  box-shadow: inset 3px 0 20px rgba(255,140,66,0.12); }
+
+.rank-num {
+  font-family:'Share Tech Mono', monospace;
+  font-size: clamp(16px, 2vw, 26px);
+  font-weight:900; width:44px; text-align:center; flex-shrink:0;
+  line-height:1;
+}
+.rank-1 .rank-num { color:var(--gold);   text-shadow:0 0 12px rgba(255,208,55,0.8); }
+.rank-2 .rank-num { color:var(--silver); text-shadow:0 0 10px rgba(184,205,217,0.6); }
+.rank-3 .rank-num { color:var(--bronze); text-shadow:0 0 10px rgba(255,140,66,0.6); }
+.rank-other .rank-num { color:rgba(255,255,255,0.35); font-size:clamp(12px,1.5vw,19px); }
+
+.op-name {
+  font-size: clamp(11px, 1.2vw, 15px);
+  font-weight:700; text-transform:uppercase;
+  letter-spacing:0.04em; color:var(--text);
+  line-height:1.2;
+  display:-webkit-box; -webkit-line-clamp:2;
+  -webkit-box-orient:vertical; overflow:hidden;
+}
+.rank-1 .op-name { color:#fff; text-shadow:0 0 10px rgba(255,208,55,0.4); }
+.rank-2 .op-name { color:rgba(255,255,255,0.9); }
+
+/* ── RIGHT PANEL (score) */
+.lane-right {
+  position:absolute; right:0; top:0; bottom:0; width:150px;
+  z-index:12;
+  background: var(--panel);
+  border-left:1px solid var(--border);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:3px;
+  clip-path: polygon(4% 0, 100% 0, 100% 100%, 0 100%);
+}
+.score-val {
+  font-family:'Share Tech Mono', monospace;
+  font-size: clamp(16px, 2vw, 26px);
+  font-weight:900; letter-spacing:0.05em;
+  transition: color 0.6s, text-shadow 0.6s;
+  line-height:1;
+}
+.score-bar-bg {
+  width:110px; height:4px;
+  background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden;
+}
+.score-bar-fill {
+  height:100%; border-radius:2px;
+  transition: width 1.2s ease, background 0.6s;
+  box-shadow: 0 0 6px currentColor;
+}
+.score-lbl {
+  font-size:9px; letter-spacing:0.15em;
+  text-transform:uppercase; color:var(--text-dim);
+}
+
+/* ── CAR ── */
+.car-wrap {
+  position:absolute; top:50%;
+  transform:translateY(-50%);
+  z-index:20; pointer-events:none;
+  transition: left 1.4s cubic-bezier(0.22, 0.9, 0.36, 1);
+}
+
+/* Idle hover at finish */
+.car-wrap.is-idle .car-svg {
+  animation: carIdle 0.8s ease-in-out infinite alternate;
+}
+@keyframes carIdle {
+  from { transform: translateY(0px); }
+  to   { transform: translateY(-2px); }
+}
+
+/* Thruster flame */
+.thruster {
+  position:absolute;
+  left:-14px; top:50%; transform:translateY(-50%);
+  display:flex; flex-direction:column; gap:2px; align-items:flex-end;
+}
+.flame {
+  border-radius:0 50% 50% 0;
+  animation:flameAnim 0.15s ease-in-out infinite alternate;
+  transform-origin: right center;
+}
+.flame-1 { width:16px; height:5px; background:linear-gradient(90deg,transparent,#FF6B00,#FFD037); }
+.flame-2 { width:22px; height:4px; background:linear-gradient(90deg,transparent,#FF3300,#FF8800); animation-delay:0.05s; }
+.flame-3 { width:12px; height:3px; background:linear-gradient(90deg,transparent,#FF0044,#FF6699); animation-delay:0.1s; }
+@keyframes flameAnim {
+  from { transform:scaleX(1) scaleY(1); opacity:1; }
+  to   { transform:scaleX(1.4) scaleY(0.7); opacity:0.8; }
+}
+
+/* Particle trail */
+.trail {
+  position:absolute; left:-8px; top:50%; transform:translateY(-50%);
+  pointer-events:none;
+}
+.trail-dot {
+  position:absolute; border-radius:50%;
+  animation:trailFade 0.5s ease-out infinite;
+}
+@keyframes trailFade {
+  0%   { transform:translateX(0) scale(1); opacity:0.8; }
+  100% { transform:translateX(-35px) scale(0); opacity:0; }
+}
+
+/* Speed warp lines */
+.warp-lines {
+  position:absolute; left:-40px; top:50%; transform:translateY(-50%);
+  pointer-events:none; opacity:0;
+  transition:opacity 0.3s;
+}
+.car-wrap.is-moving .warp-lines { opacity:1; }
+.warp-line {
+  height:1px; margin-bottom:5px;
+  background:linear-gradient(90deg,transparent,var(--cyan));
+  animation:warpAnim 0.18s linear infinite;
+}
+@keyframes warpAnim {
+  from { transform:translateX(0); opacity:0.6; }
+  to   { transform:translateX(-15px); opacity:0; }
+}
+
+/* Rank change delta */
+.rank-delta {
+  position:absolute; right:155px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:12px; font-weight:700;
+  padding:2px 8px; border-radius:6px;
+  animation:deltaFade 2.2s ease-out forwards;
+  z-index:30; pointer-events:none;
+}
+.delta-up   { color:var(--green);   background:rgba(0,255,157,0.1);  border:1px solid rgba(0,255,157,0.4); }
+.delta-down { color:var(--magenta); background:rgba(255,45,122,0.1); border:1px solid rgba(255,45,122,0.4); }
+@keyframes deltaFade {
+  0%{opacity:1;transform:translateY(0);}
+  70%{opacity:1;}
+  100%{opacity:0;transform:translateY(-24px);}
+}
+
+/* ═══════════════════════════════
+   FOOTER
+═══════════════════════════════ */
+.footer {
+  flex-shrink:0;
+  padding:7px 36px;
+  display:flex; align-items:center; gap:16px;
+  border-top:1px solid var(--border);
+  background: linear-gradient(0deg, rgba(0,229,255,0.03) 0%, transparent 100%);
+}
+.foot-lbl {
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px; color:var(--text-dim); white-space:nowrap; flex-shrink:0;
+}
+.prog-track {
+  flex:1; height:3px; background:rgba(255,255,255,0.06);
+  border-radius:2px; overflow:hidden;
+}
+.prog-fill {
+  height:100%;
+  background:linear-gradient(90deg,var(--cyan),var(--magenta));
+  border-radius:2px; width:0%;
+  transition:width 1s linear;
+  box-shadow:0 0 6px var(--cyan);
+}
+.foot-right { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.op-badge {
+  background:rgba(0,229,255,0.06); border:1px solid rgba(0,229,255,0.2);
+  border-radius:8px; padding:3px 10px;
+  font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--text-dim);
+}
+.cfg-btn {
+  background:transparent; border:1px solid rgba(0,229,255,0.2);
+  border-radius:8px; color:rgba(0,229,255,0.5);
+  padding:4px 12px; font-family:'Exo 2',sans-serif;
+  font-size:12px; font-weight:600; letter-spacing:0.08em;
+  text-transform:uppercase; cursor:pointer; transition:all 0.15s;
+}
+.cfg-btn:hover { border-color:var(--cyan); color:var(--cyan); box-shadow:0 0 10px rgba(0,229,255,0.15); }
+
+/* ═══════════════════════════════
+   CONFETTI PARTICLES
+═══════════════════════════════ */
+.particle {
+  position:fixed; pointer-events:none; z-index:997;
+  border-radius:50%;
+  animation:particleFall linear forwards;
+}
+@keyframes particleFall {
+  0%  { transform:translateY(-20px) scale(1); opacity:1; }
+  100%{ transform:translateY(105vh) scale(0.2); opacity:0; }
+}
+</style>
+</head>
+<body>
+
+<!-- SPACE BACKGROUND -->
+<div id="space-bg"></div>
+<canvas id="starfield"></canvas>
+<div class="nebula-wisp" style="width:500px;height:300px;left:-100px;top:50px;background:radial-gradient(ellipse,rgba(0,100,180,0.18),transparent 70%);animation-duration:8s;"></div>
+<div class="nebula-wisp" style="width:400px;height:400px;right:-80px;bottom:80px;background:radial-gradient(ellipse,rgba(120,0,180,0.14),transparent 70%);animation-duration:11s;animation-delay:-3s;"></div>
+<div class="nebula-wisp" style="width:300px;height:200px;left:40%;top:20%;background:radial-gradient(ellipse,rgba(0,180,140,0.08),transparent 70%);animation-duration:14s;animation-delay:-6s;"></div>
+
+<!-- CONFIG -->
+<div class="config-overlay" id="configOverlay">
+  <div class="config-box">
+    <h2>🏁 ГОНКА ЗА КАЧЕСТВО</h2>
+    <p class="sub">Настройте источник данных и запустите борд</p>
+
+    <div class="form-group">
+      <label>Google Sheets ID</label>
+      <input id="sheetId" type="text" value="1NHrU5fNogX2siHzIUKpQer5PrfH8lQm_ZcnBzKTanHs" />
+      <div class="form-hint">Из URL таблицы: .../spreadsheets/d/<b>ЭТО</b>/edit — доступ: «Все с ссылкой»</div>
+    </div>
+    <div class="form-group">
+      <label>Название листа</label>
+      <input id="sheetName" type="text" value="Leaderboard service" />
+      <div class="form-hint">Колонки: A = ФИО, B = Средний балл (0–100). Первая строка — заголовки.</div>
+    </div>
+
+    <div id="configErr" class="config-err"></div>
+    <button class="btn-launch" onclick="startBoard()">🚀 ЗАПУСТИТЬ</button>
+    <button class="btn-demo" onclick="startDemo()">▶ Демо-режим</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-side hdr-side-left">
+      <div class="live-pill"><span class="live-dot"></span>LIVE</div>
+      <div id="lastUpd" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim)">—</div>
+    </div>
+    <div class="hdr-center">
+      <div class="hdr-title">🏁 ГОНКА ЗА КАЧЕСТВО</div>
+      <div class="hdr-sub">Топ сервисных агентов галактики</div>
+    </div>
+    <div class="hdr-side">
+      <span id="opCount" class="op-badge">— агентов</span>
+    </div>
+  </header>
+
+  <!-- TRACK -->
+  <div class="track-area" id="trackArea"></div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="foot-lbl">Обновление через <b><span id="cdNum">60</span>с</b></span>
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    <div class="foot-right">
+      <button class="cfg-btn" onclick="showConfig()">⚙ настройки</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ═══════════════════════════════
+// STARFIELD
+// ═══════════════════════════════
+(function() {
+  const cv = document.getElementById('starfield');
+  const cx = cv.getContext('2d');
+  let stars = [], W, H;
+  function resize() {
+    W = cv.width = window.innerWidth;
+    H = cv.height = window.innerHeight;
+    stars = Array.from({length:300}, () => ({
+      x: Math.random()*W, y: Math.random()*H,
+      r: Math.random()*1.4+0.2,
+      speed: Math.random()*0.3+0.05,
+      a: Math.random()*0.7+0.2,
+      twinkle: Math.random()*Math.PI*2
+    }));
+  }
+  function draw() {
+    cx.clearRect(0,0,W,H);
+    const t = Date.now()*0.001;
+    stars.forEach(s => {
+      const alpha = s.a * (0.7 + 0.3*Math.sin(t*1.2 + s.twinkle));
+      cx.beginPath();
+      cx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      cx.fillStyle = `rgba(200,230,255,${alpha})`;
+      cx.fill();
+      s.x -= s.speed;
+      if (s.x < -2) { s.x = W+2; s.y = Math.random()*H; }
+    });
+    requestAnimationFrame(draw);
+  }
+  resize(); draw();
+  window.addEventListener('resize', resize);
+})();
+
+// ═══════════════════════════════
+// CAR SVG BUILDER (с львом за рулём)
+// ═══════════════════════════════
+const CAR_COLORS = [
+  {body:'#FFD037',accent:'#FF8C00',wheel:'#333',glow:'rgba(255,208,55,0.7)'},   // 1 gold
+  {body:'#B8CDD9',accent:'#7A9DB0',wheel:'#444',glow:'rgba(184,205,217,0.6)'},  // 2 silver
+  {body:'#FF8C42',accent:'#CC5500',wheel:'#333',glow:'rgba(255,140,66,0.6)'},   // 3 bronze
+  {body:'#00E5FF',accent:'#0099BB',wheel:'#222',glow:'rgba(0,229,255,0.6)'},    // 4 cyan
+  {body:'#FF2D7A',accent:'#AA0044',wheel:'#333',glow:'rgba(255,45,122,0.6)'},   // 5 magenta
+  {body:'#00FF9D',accent:'#00AA66',wheel:'#2a2a2a',glow:'rgba(0,255,157,0.6)'},    // 6 green
+  {body:'#BF5FFF',accent:'#7700CC',wheel:'#333',glow:'rgba(191,95,255,0.6)'},   // 7 purple
+  {body:'#FF6B35',accent:'#CC3300',wheel:'#2a2a2a',glow:'rgba(255,107,53,0.6)'},   // 8 orange
+  {body:'#F72585',accent:'#AA0055',wheel:'#333',glow:'rgba(247,37,133,0.6)'},   // 9 pink
+  {body:'#4CC9F0',accent:'#0077AA',wheel:'#222',glow:'rgba(76,201,240,0.6)'},   // 10 sky
+  {body:'#7BFF8A',accent:'#33AA44',wheel:'#2a2a2a',glow:'rgba(123,255,138,0.6)'},  // 11 lime
+  {body:'#FFBE0B',accent:'#CC8800',wheel:'#333',glow:'rgba(255,190,11,0.6)'},   // 12 amber
+  {body:'#3A86FF',accent:'#0044CC',wheel:'#222',glow:'rgba(58,134,255,0.6)'},   // 13 blue
+  {body:'#FF595E',accent:'#BB1122',wheel:'#333',glow:'rgba(255,89,94,0.6)'},    // 14 red
+  {body:'#8ECAE6',accent:'#4A90B8',wheel:'#2a2a2a',glow:'rgba(142,202,230,0.6)'},  // 15 steel
+];
+
+function buildRocket(rank) {
+  const c = CAR_COLORS[(rank-1) % CAR_COLORS.length];
+  const W=90, H=60;
+  return `<svg class="car-svg" width="${W}" height="${H}" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="rocketGrad${rank}" cx="45%" cy="35%">
+      <stop offset="0%" stop-color="${c.body}"/>
+      <stop offset="100%" stop-color="${c.accent}"/>
+    </radialGradient>
+    <filter id="rocketGlow${rank}">
+      <feGaussianBlur stdDeviation="2.5"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <radialGradient id="flame1">
+      <stop offset="0%" stop-color="#FFD037"/>
+      <stop offset="100%" stop-color="#FF6B00" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="flame2">
+      <stop offset="0%" stop-color="#FF6B00"/>
+      <stop offset="100%" stop-color="#FF2D7A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="flame3">
+      <stop offset="0%" stop-color="#FF2D7A"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Warp speed lines (behind rocket) -->
+  <g class="warp-lines" opacity="0.6">
+    <line x1="-10" y1="24" x2="8" y2="24" stroke="${c.body}" stroke-width="1.5" opacity="0.5"/>
+    <line x1="-15" y1="30" x2="5" y2="30" stroke="${c.body}" stroke-width="1.2" opacity="0.4"/>
+    <line x1="-8" y1="36" x2="10" y2="36" stroke="${c.body}" stroke-width="1" opacity="0.3"/>
+  </g>
+  
+  <!-- Thruster flames (animated) -->
+  <g class="flame-layer">
+    <ellipse cx="12" cy="30" rx="10" ry="6" fill="url(#flame1)" opacity="0.9">
+      <animate attributeName="rx" values="10;12;10" dur="0.15s" repeatCount="indefinite"/>
+      <animate attributeName="ry" values="6;5;6" dur="0.15s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+  <g class="flame-layer">
+    <ellipse cx="9" cy="30" rx="12" ry="7" fill="url(#flame2)" opacity="0.7">
+      <animate attributeName="rx" values="12;14;12" dur="0.12s" repeatCount="indefinite"/>
+      <animate attributeName="ry" values="7;6;7" dur="0.12s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+  <g class="flame-layer">
+    <ellipse cx="6" cy="30" rx="14" ry="8" fill="url(#flame3)" opacity="0.5">
+      <animate attributeName="rx" values="14;16;14" dur="0.1s" repeatCount="indefinite"/>
+      <animate attributeName="ry" values="8;7;8" dur="0.1s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- Engine nozzle -->
+  <ellipse cx="16" cy="30" rx="7" ry="9" fill="${c.accent}" opacity="0.9"/>
+  <ellipse cx="16" cy="30" rx="5" ry="7" fill="#1a1a1a"/>
+  <circle cx="16" cy="30" r="2.5" fill="${c.body}" opacity="0.7">
+    <animate attributeName="r" values="2.5;3;2.5" dur="0.3s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Main rocket body -->
+  <ellipse cx="50" cy="30" rx="34" ry="17" fill="url(#rocketGrad${rank})" filter="url(#rocketGlow${rank})"/>
+  
+  <!-- Bottom fin -->
+  <path d="M 34,40 L 30,50 L 38,44 Z" fill="${c.accent}" opacity="0.85"/>
+  
+  <!-- Top fin -->
+  <path d="M 34,20 L 30,10 L 38,16 Z" fill="${c.accent}" opacity="0.85"/>
+
+  <!-- Cockpit window (glass) -->
+  <ellipse cx="50" cy="30" rx="8" ry="6" fill="rgba(180,240,255,0.2)" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>
+  <ellipse cx="50" cy="30" rx="5.5" ry="4.5" fill="rgba(120,220,255,0.3)"/>
+  
+  <!-- Pilot silhouette inside -->
+  <g opacity="0.7">
+    <ellipse cx="50" cy="30" rx="3" ry="3.5" fill="#FFFFFF" opacity="0.4"/>
+    <circle cx="49" cy="29" r="0.5" fill="#000"/>
+    <circle cx="51" cy="29" r="0.5" fill="#000"/>
+  </g>
+
+  <!-- Nose cone highlight -->
+  <ellipse cx="70" cy="30" rx="8" ry="6" fill="${c.body}" opacity="0.4"/>
+  <circle cx="75" cy="28" r="3" fill="rgba(255,255,255,0.3)"/>
+  
+  <!-- Detail stripes -->
+  <path d="M 30,26 L 60,26 L 60,27 L 30,27 Z" fill="rgba(255,255,255,0.2)"/>
+  <path d="M 30,33 L 60,33 L 60,34 L 30,34 Z" fill="rgba(255,255,255,0.2)"/>
+  
+  <!-- Rank number on fuselage -->
+  <text x="64" y="35" font-family="Exo 2,sans-serif" font-size="11" font-weight="900" fill="#1a1a1a" opacity="0.6">${rank}</text>
+</svg>`;
+}
+
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let cfg = {};
+let prevRanks = {};
+let refreshTimer = null, cdTimer = null, cdVal = 60;
+let scrollDir = 1, scrollPos = 0, scrollPaused = false, scrollStarted = false;
+
+// ═══════════════════════════════
+// DEMO DATA (real operators)
+// ═══════════════════════════════
+const DEMO_DATA = [
+  {name:'Самарбекова Айдай Самарбековна',      score:99.375},
+  {name:'Азаматова Селкинай Азаматовна',        score:98.625},
+  {name:'Салпиев Эдуард Талгатбекович',         score:98.5},
+  {name:'Жабай уулу Алмамбет',                  score:98.125},
+  {name:'Турганбаева Адина Кубанычбековна',     score:98.0},
+  {name:'Алмасбекова Калбубу Алмасбековна',     score:97.0},
+  {name:'Алипсатаров Бегалы Маратович',         score:96.875},
+  {name:'Айтбекова Асель Бактыбековна',         score:96.25},
+  {name:'Эрнис уулу Марлен',                    score:96.25},
+  {name:'Кожошова Тахмина Бактыгуловна',        score:95.571},
+  {name:'Уланбек уулу Зарылбек',                score:94.5},
+  {name:'Ахмадбеков Асадбек Асилбекович',       score:94.25},
+  {name:'Джунусов Темирлан Карыбекович',        score:94.167},
+  {name:'Саскова Адинай Каныбековна',           score:94.143},
+  {name:'Сыйдалыев Акмаль Талантбекович',       score:92.875},
+];
+
+// ═══════════════════════════════
+// FETCH SHEETS (JSONP — works from file://)
+// ═══════════════════════════════
+function fetchSheet(id, sheetName) {
+  return new Promise((resolve, reject) => {
+    const old = document.getElementById('_gsjsonp');
+    if (old) old.remove();
+    if (window.__gsCB) delete window.__gsCB;
+
+    const to = setTimeout(() => {
+      delete window.__gsCB;
+      reject(new Error('Таблица не ответила (timeout 10s)'));
+    }, 10000);
+
+    window.__gsCB = function(json) {
+      clearTimeout(to);
+      delete window.__gsCB;
+      try {
+        const rows = json.table.rows || [];
+        const result = [];
+        for (const row of rows) {
+          if (!row.c || !row.c[0] || row.c[0].v == null) continue;
+          const name = String(row.c[0].v).trim();
+          const score = parseFloat(row.c[1]?.v);
+          const skip = ['итого','всего','total','average'].some(w => name.toLowerCase().includes(w));
+          if (name && !isNaN(score) && !skip) result.push({name, score});
+        }
+        const sorted = result.sort((a,b) => b.score - a.score).slice(0, 15);
+        sorted.length ? resolve(sorted) : reject(new Error('Нет данных'));
+      } catch(e) { reject(e); }
+    };
+
+    const script = document.createElement('script');
+    script.id = '_gsjsonp';
+    script.src = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&callback=__gsCB&sheet=${encodeURIComponent(sheetName)}`;
+    script.onerror = () => { clearTimeout(to); delete window.__gsCB; reject(new Error('Сеть недоступна')); };
+    document.head.appendChild(script);
+  });
+}
+
+// ═══════════════════════════════
+// SCORE HELPERS (позиционирование от 0 до 100)
+// ═══════════════════════════════
+function scoreColor(s, max, min) {
+  const t = max===min ? 1 : (s-min)/(max-min);
+  if (t > 0.88) return '#FFD037';
+  if (t > 0.65) return '#00FF9D';
+  if (t > 0.40) return '#00E5FF';
+  if (t > 0.20) return '#FF8C42';
+  return '#FF2D7A';
+}
+
+function carLeft(score, raceW, leftW, rank, totalRanks) {
+  // Позиционируем по рангу: 1 место ближе всего к финишу (90%), последнее - дальше (30%)
+  // Инвертируем: rank=1 -> t=1.0, rank=15 -> t=0
+  const t = 1 - ((rank - 1) / (totalRanks - 1));
+  // Размещаем от 30% до 90% трассы
+  const minPos = 0.30;
+  const maxPos = 0.90;
+  const position = minPos + t * (maxPos - minPos);
+  return leftW + position * raceW;
+}
+
+// ═══════════════════════════════
+// RENDER
+// ═══════════════════════════════
+function renderBoard(data) {
+  const area = document.getElementById('trackArea');
+  const isFirst = !area.querySelector('.lane');
+  const maxS = Math.max(...data.map(d=>d.score));
+  const minS = Math.min(...data.map(d=>d.score));
+
+  document.getElementById('opCount').textContent = data.length + ' агентов';
+  document.getElementById('lastUpd').textContent = new Date().toLocaleTimeString('ru-RU');
+
+  if (isFirst) {
+    area.innerHTML = '';
+    data.forEach((op, i) => area.appendChild(buildLane(op, i+1, maxS, minS)));
+    requestAnimationFrame(() => {
+      data.forEach((op, i) => setTimeout(() => moveCar(i+1, op.score, maxS, minS, data.length), 80 + i*90));
+    });
+  } else {
+    // detect rank changes
+    const newRanks = {};
+    data.forEach((op,i) => { newRanks[op.name] = i+1; });
+    data.forEach((op,i) => {
+      const prev = prevRanks[op.name];
+      if (prev && prev !== i+1) showDelta(i+1, prev-(i+1));
+    });
+    // update content
+    data.forEach((op, i) => {
+      const rank = i+1;
+      const lane = area.querySelector(`[data-rank="${rank}"]`);
+      if (!lane) return;
+      lane.querySelector('.op-name').textContent = op.name;
+      const sv = lane.querySelector('.score-val');
+      sv.textContent = op.score.toFixed(1);
+      sv.style.color = scoreColor(op.score, maxS, minS);
+      sv.style.textShadow = `0 0 12px ${scoreColor(op.score, maxS, minS)}`;
+      const fill = lane.querySelector('.score-bar-fill');
+      const t = maxS===minS?1:(op.score-minS)/(maxS-minS);
+      fill.style.width = (8+t*92)+'%';
+      fill.style.background = scoreColor(op.score, maxS, minS);
+      moveCar(rank, op.score, maxS, minS, data.length);
+    });
+    // confetti if new #1
+    if (data[0] && prevRanks[data[0].name] && prevRanks[data[0].name] > 1) spawnParticles();
+  }
+
+  prevRanks = {};
+  data.forEach((op,i) => { prevRanks[op.name] = i+1; });
+}
+
+function buildLane(op, rank, maxS, minS) {
+  const div = document.createElement('div');
+  div.className = `lane rank-${rank <= 3 ? rank : 'other'}`;
+  div.setAttribute('data-rank', rank);
+
+  const col = scoreColor(op.score, maxS, minS);
+  const t = maxS===minS?1:(op.score-minS)/(maxS-minS);
+  const barW = Math.round(8+t*92);
+  const rankLabel = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'#'+rank;
+
+  div.innerHTML = `
+    <div class="track-tube"></div>
+    <div class="finish-gate"></div>
+    <div class="lane-left">
+      <div class="rank-num">${rankLabel}</div>
+      <div class="op-name">${op.name}</div>
+    </div>
+    <div class="car-wrap" id="car-${rank}">
+      <div class="warp-lines">
+        <div class="warp-line" style="width:30px"></div>
+        <div class="warp-line" style="width:22px;margin-left:6px"></div>
+        <div class="warp-line" style="width:26px;margin-left:2px"></div>
+      </div>
+      <div class="thruster">
+        <div class="flame flame-1"></div>
+        <div class="flame flame-2"></div>
+        <div class="flame flame-3"></div>
+      </div>
+      ${buildRocket(rank)}
+    </div>
+    <div class="lane-right">
+      <div class="score-val" style="color:${col};text-shadow:0 0 12px ${col}">${op.score.toFixed(1)}</div>
+      <div class="score-bar-bg"><div class="score-bar-fill" style="width:${barW}%;background:${col}"></div></div>
+      <div class="score-lbl">из 100</div>
+    </div>`;
+
+  // Start car off-screen left
+  div.querySelector(`#car-${rank}`).style.left = '300px';
+  return div;
+}
+
+function moveCar(rank, score, maxS, minS, totalRanks) {
+  const area = document.getElementById('trackArea');
+  const car = document.getElementById('car-'+rank);
+  if (!car) return;
+
+  const areaW = area.clientWidth;
+  const leftW  = 296;
+  const rightW = 150;
+  const finishX = areaW - rightW - 22;
+  const raceW = finishX - leftW - 90; // Reserve 90px for rocket width to prevent crossing finish
+
+  const target = carLeft(score, raceW, leftW, rank, totalRanks);
+
+  car.classList.add('is-moving');
+  car.style.left = target + 'px';
+
+  setTimeout(() => {
+    car.classList.remove('is-moving');
+    // Only top 3 get idle animation
+    car.classList.toggle('is-idle', rank <= 3);
+  }, 1600);
+}
+
+// ═══════════════════════════════
+// DELTA BADGE
+// ═══════════════════════════════
+function showDelta(rank, delta) {
+  const lane = document.querySelector(`[data-rank="${rank}"]`);
+  if (!lane) return;
+  const el = document.createElement('div');
+  el.className = 'rank-delta ' + (delta > 0 ? 'delta-up' : 'delta-down');
+  el.textContent = delta > 0 ? '▲ +'+delta : '▼ '+delta;
+  lane.appendChild(el);
+  setTimeout(() => el.remove(), 2400);
+}
+
+// ═══════════════════════════════
+// PARTICLES
+// ═══════════════════════════════
+function spawnParticles() {
+  const colors = [
+    'var(--gold)','var(--cyan)','var(--magenta)',
+    'var(--green)','#BF5FFF','#FF8C42'
+  ];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'particle';
+      const size = 4 + Math.random()*6;
+      el.style.cssText = `
+        left:${10+Math.random()*80}vw;
+        width:${size}px; height:${size}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        box-shadow:0 0 ${size}px currentColor;
+        animation-duration:${1.5+Math.random()*2.5}s;
+        animation-delay:${Math.random()*0.8}s;`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 5000);
+    }, i * 20);
+  }
+}
+
+// ═══════════════════════════════
+// COUNTDOWN
+// ═══════════════════════════════
+function startCountdown(secs) {
+  clearInterval(cdTimer);
+  cdVal = secs;
+  const fill = document.getElementById('progFill');
+  const cd   = document.getElementById('cdNum');
+  cd.textContent = cdVal;
+  cdTimer = setInterval(() => {
+    cdVal--;
+    cd.textContent = Math.max(0,cdVal);
+    fill.style.width = ((secs-cdVal)/secs*100)+'%';
+    if (cdVal<=0) clearInterval(cdTimer);
+  }, 1000);
+}
+
+// ═══════════════════════════════
+// AUTO SCROLL
+// ═══════════════════════════════
+function initAutoScroll() {
+  if (scrollStarted) return;
+  scrollStarted = true;
+  const area = document.getElementById('trackArea');
+  setInterval(() => {
+    if (scrollPaused) return;
+    const max = area.scrollHeight - area.clientHeight;
+    if (max <= 0) return;
+    scrollPos += scrollDir * 0.5;
+    if (scrollPos >= max) {
+      scrollPos = max; scrollDir = -1;
+      scrollPaused = true; setTimeout(()=>{scrollPaused=false;}, 3000);
+    }
+    if (scrollPos <= 0) {
+      scrollPos = 0; scrollDir = 1;
+      scrollPaused = true; setTimeout(()=>{scrollPaused=false;}, 3000);
+    }
+    area.scrollTop = scrollPos;
+  }, 30);
+}
+
+// ═══════════════════════════════
+// LOAD & RENDER
+// ═══════════════════════════════
+async function loadAndRender() {
+  if (cfg.demo) {
+    const data = DEMO_DATA.map(d => ({
+      name: d.name,
+      score: Math.max(30, Math.min(100, d.score + (Math.random()-.5)*1.2))
+    })).sort((a,b)=>b.score-a.score);
+    renderBoard(data);
+    startCountdown(15);
+    return;
+  }
+  try {
+    const data = await fetchSheet(cfg.sheetId, cfg.sheetName);
+    document.getElementById('configErr').style.display = 'none';
+    renderBoard(data);
+    startCountdown(cfg.interval);
+  } catch(e) {
+    const err = document.getElementById('configErr');
+    err.style.display = 'block';
+    const m = e.message||'';
+    if (m.includes('timeout')||m.includes('Timeout'))
+      err.textContent = '⌛ Таблица не отвечает. Проверьте ID и название листа.';
+    else if (m.includes('данных'))
+      err.textContent = '⌛ Лист пустой. Колонки: A = ФИО, B = Балл. Строка 1 — заголовки.';
+    else
+      err.textContent = '⌛ Ошибка: ' + m + '. Убедитесь — доступ «Все с ссылкой → Читатель».';
+    if (!document.querySelector('.lane')) showConfig();
+  }
+}
+
+// ═══════════════════════════════
+// UI FLOW
+// ═══════════════════════════════
+function showBoard() {
+  document.getElementById('configOverlay').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+}
+function showConfig() {
+  document.getElementById('configOverlay').style.display = 'flex';
+}
+
+async function startBoard() {
+  const id = document.getElementById('sheetId').value.trim();
+  const sn = document.getElementById('sheetName').value.trim() || 'Лист1';
+  if (!id) {
+    const err = document.getElementById('configErr');
+    err.style.display='block'; err.textContent='⌛ Введите ID таблицы';
+    return;
+  }
+  cfg = { sheetId:id, sheetName:sn, interval:60, demo:false };
+  showBoard();
+  await loadAndRender();
+  clearInterval(refreshTimer);
+  refreshTimer = setInterval(loadAndRender, 60_000);
+  setTimeout(initAutoScroll, 2500);
+}
+
+function startDemo() {
+  cfg = { interval:15, demo:true };
+  showBoard();
+  loadAndRender();
+  clearInterval(refreshTimer);
+  refreshTimer = setInterval(loadAndRender, 15_000);
+  setTimeout(initAutoScroll, 2500);
+}
+
+// ═══════════════════════════════
+// RESIZE: reposition cars
+// ═══════════════════════════════
+window.addEventListener('resize', () => {
+  const lanes = document.querySelectorAll('.lane');
+  if (!lanes.length) return;
+  const scores = [...lanes].map(l => parseFloat(l.querySelector('.score-val').textContent));
+  const maxS = Math.max(...scores), minS = Math.min(...scores);
+  lanes.forEach((lane, i) => {
+    moveCar(i+1, scores[i], maxS, minS);
+  });
+});
+
+// ═══════════════════════════════
+// AUTO-LAUNCH
+// ═══════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  cfg = {
+    sheetId:   '1NHrU5fNogX2siHzIUKpQer5PrfH8lQm_ZcnBzKTanHs',
+    sheetName: 'Leaderboard service',
+    interval:  60,
+    demo:      false
+  };
+  showBoard();
+  loadAndRender().then(() => {
+    clearInterval(refreshTimer);
+    refreshTimer = setInterval(loadAndRender, 60_000);
+    setTimeout(initAutoScroll, 2500);
+  });
+});
+</script>
+</body>
+</html>
