@@ -766,7 +766,7 @@ function fetchSheet(id, sheetName) {
         for (const row of rows) {
           if (!row.c || !row.c[0] || row.c[0].v == null) continue;
           const name = String(row.c[0].v).trim();
-          const score = parseFloat(row.c[1]?.v);
+         const score = parseFloat(String(row.c[1]?.v).replace(',', '.'));
           const skip = ['итого','всего','total','average'].some(w => name.toLowerCase().includes(w));
           if (name && !isNaN(score) && !skip) result.push({name, score});
         }
@@ -1087,7 +1087,7 @@ window.addEventListener('resize', () => {
 window.addEventListener('DOMContentLoaded', () => {
   cfg = {
     sheetId:   '1NHrU5fNogX2siHzIUKpQer5PrfH8lQm_ZcnBzKTanHs',
-    sheetName: 'Leaderboard service',
+    sheetName: 'List1',
     interval:  60,
     demo:      false
   };
